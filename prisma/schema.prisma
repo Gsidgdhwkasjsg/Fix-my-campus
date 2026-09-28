@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Issue {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  category     String    // ELECTRICAL, PLUMBING, FURNITURE, LAB_EQUIPMENT, SANITATION, OTHER
+  block        String    // e.g. Academic Block A, Mechanical Workshop, Hostel 2, Central Library, Student Centre
+  floor        String    // e.g. Ground Floor, 1st Floor, 2nd Floor, 3rd Floor, Basement
+  room         String    // e.g. Lab 302, Washroom 1B, Classroom 405, Seminar Hall
+  imageUrl     String?
+  status       String    @default("REPORTED") // REPORTED, IN_REVIEW, ASSIGNED, IN_PROGRESS, RESOLVED
+  upvotesCount Int       @default(0)
+  adminNote    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  upvotes      Upvote[]
+}
+
+model Upvote {
+  id             String   @id @default(cuid())
+  issueId        String
+  issue          Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userIdentifier String
+  createdAt      DateTime @default(now())
+
+  @@unique([issueId, userIdentifier])
+}
